@@ -10,56 +10,71 @@ Backend para **Bibliotech**, una plataforma de biblioteca virtual donde los usua
 
 ## 🚀 Tecnologías
 
-- **Python 3.10+**
-- **Django 4.x**
-- **Django REST Framework**
-- **SQLite** (por defecto, reemplazable por PostgreSQL o MongoDB)
-- **JWT Authentication** (a implementar)
-- **Cloudinary o S3** para almacenamiento de archivos (opcional)
-- **CORS** habilitado para frontend en React/Vite
+- **Node.js** 20+
+- **Nest.js** 10+
+- **TypeScript**
+- **TypeORM** + PostgreSQL (configurable con otras bases de datos)
+- **JWT Authentication** (tokens de acceso y refresco)
+- **Cloudinary** o **Amazon S3** (opcional) para almacenamiento de archivos
+- **CORS** habilitado para frontend en Angular
 
 ## 📁 Estructura del Proyecto
 
-bibliotech_backend/
-├── core/ # App principal con modelos, vistas y urls
-├── bibliotech_backend/ # Configuración del proyecto
-├── manage.py
-├── requirements.txt
+bibliotech-2099_back/
+├── src/
+│ ├── auth/ # Autenticación y autorización
+│ ├── users/ # Gestión de usuarios
+│ ├── books/ # Gestión de libros
+│ ├── libraries/ # Bibliotecas personales
+│ ├── comments/ # Comentarios y calificaciones
+│ ├── shared/ # Utilidades y helpers
+│ └── main.ts # Punto de entrada
+├── .env # Variables de entorno
+├── package.json
+├── tsconfig.json
 └── README.md
 
 ## 🔧 Instalación
 
 1. Clona este repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/bibliotech-backend.git
-   cd bibliotech-backend
+   git clone https://github.com/tu-usuario/bibliotech-back.git
+   cd bibliotech-back
 
-2. Crea un entorno virtual:
+2. Instalar dependencias:
 ```bash
-python -m venv env
-source env/bin/activate
+npm install
+```
+3. Configurar las variables de entorno:
+    Crear un archivo .env en la raíz con:
+```bash
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_NAME=bibliotech
+JWT_SECRET=supersecreto
+JWT_REFRESH_SECRET=supersecreto_refresh
+PORT=3000
+```
+4. Ejecuta las migraciones:
+```bash
+npm run typeorm migration:run 
+```
+5. Iniciar el servidor:
+```bash
+npm run start:dev
 ```
 
-2. Instala las dependencias:
-```
-pip install -r requirements.txt
-```
-
-3. Crea la base de datos y aplica las migraciones:
-```
-python manage.py migrate
-```
-4. Crea un superusuario (opcional para el admin panel):
-```
-python manage.py createsuperuser
-```
-5. Ejecuta el servidor:
-```
-python manage.py runserver
-```
 🔒 Autenticación
+La API utiliza JWT para proteger endpoints privados:
 
-Se implementará autenticación basada en tokens JWT para el acceso a los endpoints protegidos (login, registro, perfil, etc.).
+Login y Registro generan un accessToken y un refreshToken.
+
+El accessToken expira rápido y se renueva con el refreshToken.
+
+Endpoints como /books, /libraries, /comments requieren autenticación.
+
 📚 Funcionalidades planificadas
 
 Registro e inicio de sesión de usuarios
@@ -74,11 +89,14 @@ Estado de lectura: leído, en lectura, no leído
 
 Visor de lectura embebido
 
-    Panel de administración para moderar contenido
+Panel de administración para moderar contenido
 
 🌐 Frontend
 
-El frontend del proyecto se desarrolla por separado, con Vite + React, en el repositorio: bibliotech-frontend
+El frontend se desarrolla con Angular en un repositorio separado:
+
+bibliotech-2099_front
+
 📝 Licencia
 
 Este proyecto está bajo la licencia MIT. Ver archivo LICENSE para más información.
