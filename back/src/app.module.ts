@@ -5,18 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
 import { BooksModule } from './modules/books/books.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { typeOrmConfig } from './config/ormconfig';
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: 'localhost', 
-    port: 5432,
-    username: 'your_username',
-    password: 'your_password', 
-    database: 'your_database',
-    autoLoadEntities: true,
-    synchronize: true,
-  }), UsersModule, BooksModule, AuthModule],
+  imports: [TypeOrmModule.forRoot(typeOrmConfig), 
+    UsersModule, 
+    BooksModule, 
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
