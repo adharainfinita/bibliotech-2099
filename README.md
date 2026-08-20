@@ -48,11 +48,11 @@ npm install
 3. Configurar las variables de entorno:
     Crear un archivo .env en la raíz con:
 ```bash
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=bibliotech
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=bibliotech
 JWT_SECRET=supersecreto
 JWT_REFRESH_SECRET=supersecreto_refresh
 PORT=3000

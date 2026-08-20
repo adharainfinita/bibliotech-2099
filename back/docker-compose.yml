@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: bibliotech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bibliotech
+      POSTGRES_PASSWORD: bibliotech
+      POSTGRES_DB: bibliotech
+    ports:
+      - "5432:5432"
