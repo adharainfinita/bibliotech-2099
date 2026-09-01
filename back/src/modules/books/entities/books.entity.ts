@@ -3,21 +3,21 @@ import { User } from "../../users/entities/users.entity";
 
 @Entity()
 export class Book {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id!: string;
 
     @Column()
-    title: string;
+    title!: string;
 
     @Column()
-    author: string;
+    author!: string;
 
     @Column({nullable: true})
-    description: string;
+    description!: string;
 
     @Column()
-    fileUrl: string; // Ruta en S3 o Cloudinary
+    fileUrl!: string; // Ruta en S3 o Cloudinary
 
     @ManyToOne(() => User, (user) => user.books)
-    owner: User;
+    owner!: User;
 }
