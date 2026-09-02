@@ -21,11 +21,14 @@ export class User {
     email!: string;
 
     @Column({ 
+        name: 'password_hash',
         type: 'varchar',
     })
     passwordHash!: string;
 
-   @CreateDateColumn()
+   @CreateDateColumn({
+    name: 'created_at',
+   })
     createdAt!: Date;
 
     @OneToMany(() => Book, (book) => book.owner)
