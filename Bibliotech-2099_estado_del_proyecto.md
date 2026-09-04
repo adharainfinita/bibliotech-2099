@@ -393,273 +393,106 @@ USER
 El diseño original proporcionado fue:
 
 ```text
-USER
-──────────────────────────
-id UUID PRIMARY KEY
-username VARCHAR(30) NOT NULL
-email VARCHAR(50) NOT NULL
-password_hash VARCHAR(50)
-created_at DATE
-shared_books [bookId]
+┌──────────────────────────────────────────┐
+│                   USER                   │
+├──────────────────────────────────────────┤
+│ PK  id              UUID                 │
+│     username        VARCHAR(30) NOT NULL │
+│     email           VARCHAR(50)          │
+│     password_hash   VARCHAR(50)          │
+│     created_at      DATE                 │
+│       │
+└──────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐
+│                   BOOK                   │
+├──────────────────────────────────────────┤
+│ PK  id             UUID                  │
+│     title          VARCHAR(50)           │
+│     author         VARCHAR(25)           │
+│     genre          VARCHAR(50)           │
+│     description    VARCHAR(500)          │
+│     file_url       TEXT                  │
+│     cover_url      TEXT                  │
+│ FK  owner_id       REFERENCES User(id)   │
+└──────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────┐
+│                BOOK SHARE                │
+├──────────────────────────────────────────┤
+│ FK  book_id        UUID REFERENCES       │
+│                    Book(id)              │
+│                                          │
+│ FK  user_id        UUID REFERENCES       │
+│                    User(id)              │
+│                                          │
+│ PK  (book_id, user_id)                   │
+└──────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐
+│                BOOK SHARE                │
+├──────────────────────────────────────────┤
+│ FK  book_id        UUID REFERENCES       │
+│                    Book(id)              │
+│                                          │
+│ FK  user_id        UUID REFERENCES       │
+│                    User(id)              │
+│                                          │
+│ PK  (book_id, user_id)                   │
+└──────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐
+│                 COMMENT                  │
+├──────────────────────────────────────────┤
+│ PK  id             UUID                  │
+│                                          │
+│ FK  book_id        UUID REFERENCES       │
+│                    Book(id)              │
+│                                          │
+│ FK  user_id        UUID REFERENCES       │
+│                    User(id)              │
+│                                          │
+│     text           TEXT                  │
+│                                          │
+│     created_at     TIMESTAMP             │
+│                    DEFAULT               │
+│                    CURRENT_TIMESTAMP     │
+└──────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐
+│                  RATING                  │
+├──────────────────────────────────────────┤
+│ FK  book_id        UUID REFERENCES       │
+│                    Book(id)              │
+│                                          │
+│ FK  user_id        UUID REFERENCES       │
+│                    User(id)              │
+│                                          │
+│     score          INTEGER               │
+│                    CHECK (score          │
+│                    BETWEEN 1 AND 5)      │
+│                                          │
+│ PK  (book_id, user_id)                   │
+└──────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐
+│              READING STATUS              │
+├──────────────────────────────────────────┤
+│ FK  book_id        UUID REFERENCES       │
+│                    Book(id)              │
+│                                          │
+│ FK  user_id        UUID REFERENCES       │
+│                    User(id)              │
+│                                          │
+│ PK  (book_id, user_id)                   │
+│                                          │
+│     status         ENUM                  │
+│                    ('reading',           │
+│                     'read',              │
+│                     'unread')            │
+└──────────────────────────────────────────┘
 ```
-
----
-
-# 11. Decisiones tomadas sobre `USER`
-
-Antes de implementar la entidad se propusieron varias mejoras.
-
-## `id`
-
-Se mantiene como:
-
-```text
-UUID PRIMARY KEY
-```
-
-En TypeORM:
-
-```ts
-@PrimaryGeneratedColumn('uuid')
-id: string;
-```
-
----
-
-## `username`
-
-Diseño:
-
-```text
-VARCHAR(30)
-```
-
-Se recomendó que sea único:
-
-```text
-VARCHAR(30)
-UNIQUE
-NOT NULL
-```
-
-Porque el usuario representa un perfil/biblioteca y debe poder identificarse de manera única.
-
----
-
-## `email`
-
-Se recomendó:
-
-```text
-VARCHAR(50)
-UNIQUE
-NOT NULL
-```
-
----
-
-## `password_hash`
-
-El diseño original era:
-
-```text
-VARCHAR(50)
-```
-
-Se recomendó **no limitar el hash a 50 caracteres**, porque algoritmos como bcrypt pueden generar hashes más largos.
-
-La idea sería utilizar un campo `varchar` sin un límite artificial.
-
-En TypeScript se utilizaría:
-
-```ts
-passwordHash
-```
-
-y potencialmente la columna SQL podría llamarse:
-
-```text
-password_hash
-```
-
----
-
-## `created_at`
-
-El diseño original era:
-
-```text
-DATE
-```
-
-Se recomendó utilizar fecha y hora:
-
-```text
-TIMESTAMP
-```
-
-y en TypeORM:
-
-```ts
-@CreateDateColumn()
-createdAt: Date;
-```
-
-Esto permite que TypeORM gestione automáticamente la fecha de creación.
-
----
-
-# 12. Decisión importante: `shared_books`
-
-El diseño original contenía:
-
-```text
-shared_books [bookId]
-```
-
-Se decidió que esto **no debería almacenarse como un array dentro de USER**.
-
-No sería recomendable algo como:
-
-```text
-shared_books = [
-  bookId1,
-  bookId2,
-  bookId3
-]
-```
-
-La funcionalidad real es:
-
-> Un usuario puede compartir un libro con otro usuario.
-
-Por tanto, debe representarse como una relación.
-
-Se propuso una entidad intermedia similar a:
-
-```text
-BOOK_SHARE
-────────────────
-id
-book_id
-owner_id
-recipient_id
-shared_at
-```
-
-Conceptualmente:
-
-```text
-User A
-   │
-   │ comparte
-   ▼
-Book
-   │
-   │ compartido con
-   ▼
-User B
-```
-
-Por tanto, `shared_books` fue eliminado como columna directa de `USER`.
-
----
-
-# 13. Diseño conceptual actualizado de USER
-
-La entidad `USER` quedaría conceptualmente:
-
-```text
-USER
-─────────────────────────────
-id              UUID PK
-username        VARCHAR(30) UNIQUE NOT NULL
-email           VARCHAR(50) UNIQUE NOT NULL
-password_hash   VARCHAR NOT NULL
-created_at      TIMESTAMP NOT NULL
-```
-
-Más adelante tendrá relaciones con otras entidades.
-
-Conceptualmente:
-
-```text
-USER
- │
- ├── owns ─────────────── Book
- │
- ├── receives ─────────── BookShare
- │
- ├── sends ────────────── BookShare
- │
- ├── writes ───────────── Comment
- │
- ├── creates ──────────── Rating
- │
- └── has ──────────────── ReadingStatus
-```
-
----
-
-# 14. Entidades previstas
-
-Las entidades o conceptos principales que se han discutido para Bibliotech son:
-
-```text
-User
-Book
-BookShare
-Comment
-Rating
-ReadingStatus
-```
-
-La estructura definitiva dependerá del resto del diagrama entidad-relación original.
-
-Es importante que, al retomar el proyecto, se revise nuevamente el diagrama completo antes de implementar todas las entidades.
-
-No conviene inventar relaciones directamente en código sin contrastarlas con el modelo de datos.
-
----
-
-# 15. Próximo paso exacto
-
-El siguiente paso del proyecto es:
-
-## Crear el módulo `users`
-
-Dentro de Nest:
-
-```text
-src/
-└── users/
-    ├── users.module.ts
-    ├── users.service.ts
-    ├── users.controller.ts
-    └── entities/
-        └── user.entity.ts
-```
-
-El objetivo inicial **no es crear todavía endpoints ni autenticación**.
-
-El objetivo es aprender cómo Nest organiza una funcionalidad:
-
-```text
-Module
-   │
-   ├── Controller
-   │
-   ├── Service
-   │
-   └── Entity
-```
-
-Y después crear la primera entidad:
-
-```text
-User
-```
-
 ---
 
 # 16. Flujo recomendado para retomar
@@ -807,13 +640,13 @@ PostgreSQL Docker   ✅
 Conexión TypeORM    ✅
 
 ENTIDADES:
-User                ⏳ Pendiente de implementar
-Book                ⏳ Pendiente
+User                ✅
+Book                ✅
 BookShare           ⏳ Pendiente
 Comment             ⏳ Pendiente
 Rating              ⏳ Pendiente
 ReadingStatus       ⏳ Pendiente
 
 SIGUIENTE PASO:
-Crear el módulo users y la entidad User.
+Completar los módulos User y Books.
 ```
