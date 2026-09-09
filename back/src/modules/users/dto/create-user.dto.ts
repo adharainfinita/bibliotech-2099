@@ -1,4 +1,4 @@
-import {IsNotEmpty, MaxLength, MinLength, IsEmail, Min } from 'class-validator';
+import {IsNotEmpty, MaxLength, MinLength, IsEmail } from 'class-validator';
 
 
 
