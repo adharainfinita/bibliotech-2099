@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -43,7 +44,7 @@ export class UsersService {
 
   async findById(id: string): Promise<UserResponseDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) return null;
+    if (!user) throw new NotFoundException(`User with id ${id} not found`);
     return {
       id: user.id,
       username: user.username,
@@ -77,9 +78,9 @@ export class UsersService {
   }
     */
   //*Update Services
-  async update(id: string, updateUserDto: any): Promise<UserResponseDto | null> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) return null;
+    if (!user) throw new NotFoundException(`User with id ${id} not found`);
 
     if (updateUserDto.username) {
       user.username = updateUserDto.username;
@@ -98,5 +99,15 @@ export class UsersService {
       email: updatedUser.email,
       createdAt: updatedUser.createdAt,
     };
+  }
+  //*Delete Services
+  async remove(id: string): Promise<boolean> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 }
