@@ -1,9 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
 
 export class CreateBookDto { 
-  @IsNotEmpty()
-  id!: string;
-
+  
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(50)
