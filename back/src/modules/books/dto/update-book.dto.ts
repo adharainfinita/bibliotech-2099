@@ -2,17 +2,17 @@ import { IsNotEmpty, IsOptional, IsString, MinLength, MaxLength } from 'class-va
 
 export class UpdateBookDto { 
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(2)
   @MaxLength(50)
   title?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(2)
   @MaxLength(50)
   author?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(2)
   @MaxLength(50)
   genre?: string;
@@ -21,7 +21,7 @@ export class UpdateBookDto {
   @IsString()
   description?: string;
   
-  @IsNotEmpty()
+  @IsOptional()
   fileUrl?: string;
   
   @IsOptional()

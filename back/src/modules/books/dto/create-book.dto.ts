@@ -1,13 +1,15 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength, MaxLength, IsUUID } from 'class-validator';
 
 export class CreateBookDto { 
   
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(50)
+  @IsString()
   title!: string;
 
   @IsNotEmpty()
+  @IsString()
   @MinLength(2)
   @MaxLength(50)
   author!: string;
@@ -15,6 +17,7 @@ export class CreateBookDto {
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(50)
+  @IsString()
   genre!: string;
   
   @IsOptional()
@@ -22,12 +25,13 @@ export class CreateBookDto {
   description?: string;
   
   @IsNotEmpty()
+  @IsString()
   fileUrl!: string;
   
   @IsOptional()
   @IsString()
   coverImageUrl?: string;
 
-  @IsNotEmpty()
+  @IsUUID()
   ownerId!: string;
 }

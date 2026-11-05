@@ -6,15 +6,17 @@ import {
   Param,
   Patch,
   Post,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
-  @Post(':id')
+  @Post()
   async create(@Body() createBookDto: CreateBookDto) {
     return this.booksService.create(createBookDto);
   }
@@ -24,20 +26,20 @@ export class BooksController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string) {
+  async findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.booksService.findById(id);
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
-    @Body() updateBookDto: Partial<CreateBookDto>,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateBookDto: UpdateBookDto,
   ) {
     return this.booksService.update(id, updateBookDto);
   }
   
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.booksService.remove(id);
   }
 }

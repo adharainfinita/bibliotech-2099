@@ -13,8 +13,26 @@ export class BooksService {
 
 //*Create services
   async create(createBookDto: CreateBookDto): Promise<Book> {
-    const book = this.bookRepository.create(createBookDto);
-    return this.bookRepository.save(book);
+   const owner = await this.bookRepository.findOne({ 
+    where: { id: createBookDto.ownerId } 
+  });
+  if (!owner) {
+    throw new NotFoundException(`Owner with id ${createBookDto.ownerId} not found`);
+  }
+  const book = this.bookRepository.create({
+    title: createBookDto.title,
+    author: createBookDto.author,
+    genre: createBookDto.genre,
+    description: createBookDto.description,
+    fileUrl: createBookDto.fileUrl,
+    coverImageUrl: createBookDto.coverImageUrl,
+    // cuando implementemos autenticación, el propietario debería 
+    // obtenerse del usuario autenticado, 
+    // no confiar en un ownerId enviado libremente por el cliente.
+    // Por ahora podemos utilizar ownerId para practicar la relación.
+    owner,
+  });
+  return this.bookRepository.save(book);
   }
 
 //*Read services
@@ -22,7 +40,7 @@ export class BooksService {
     return this.bookRepository.find();
   }
 
-  async findById(id: string): Promise<Book | null> {
+  async findById(id: string): Promise<Book> {
     const book  = await this.bookRepository.findOne({ where: { id } });
     if (!book) throw new NotFoundException(`Book with id ${id} not found`);
     return book;
@@ -40,7 +58,6 @@ export class BooksService {
   async remove(id: string): Promise<boolean> {
     const book = await this.bookRepository.findOne({ where: { id } });
     if (!book) throw new NotFoundException(`Book with id ${id} not found`);
-    const result = await this.bookRepository.remove(book);
-    return result ? true : false;
+    return true;
   }
 }
