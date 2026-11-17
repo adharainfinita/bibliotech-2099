@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+interface PostgresError {
+  code: string;
+  detail?: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -16,19 +21,44 @@ export class UsersService {
 
   //*Create services
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const existingUsername = await this.userRepository.findOne({
+  where: { username: createUserDto.username },
+  });
+
+  if (existingUsername) {
+    throw new ConflictException('El nombre de usuario ya está registrado');
+  }
+
+  const existingEmail = await this.userRepository.findOne({
+    where: { email: createUserDto.email },
+  });
+
+  if (existingEmail) {
+    throw new ConflictException('El email ya está registrado');
+  }
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
       username: createUserDto.username,
       email: createUserDto.email,
       passwordHash,
     });
-    const savedUser = await this.userRepository.save(user);
-    return {
-      id: savedUser.id,
-      username: savedUser.username,
-      email: savedUser.email,
-      createdAt: savedUser.createdAt,
-    };
+    try {
+      const savedUser = await this.userRepository.save(user);
+      return {
+        id: savedUser.id,
+        username: savedUser.username,
+        email: savedUser.email,
+        createdAt: savedUser.createdAt,
+      }
+    } catch (error) { 
+      if (error instanceof QueryFailedError) {
+        const driverError = error.driverError as PostgresError;
+        if (driverError.code === '23505') {
+          throw new ConflictException('El nombre de usuario o email ya está registrado');
+        }
+      }
+      throw error;
+    }
   }
 
   //*Read services
