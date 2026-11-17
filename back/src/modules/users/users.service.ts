@@ -82,31 +82,12 @@ export class UsersService {
       createdAt: user.createdAt,
     };
   }
-  /*
-  async findByUsername(username: string): Promise<UserResponseDto | null> {
-    const user = await this.userRepository.findOne({ where: { username } });
-    if (!user) return null;
 
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt,
-    };
-  }
-
-  async findByEmail(email: string): Promise<UserResponseDto | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) return null;
-
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt,
-    };
-  }
-    */
+  async findByEmailForAuth(email: string): Promise<User | null> {
+  return this.userRepository.findOne({
+    where: { email },
+  });
+}
   //*Update Services
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });

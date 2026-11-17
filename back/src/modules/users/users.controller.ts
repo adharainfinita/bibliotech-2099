@@ -20,12 +20,8 @@ export class UsersController {
   async findByUsername(@Body('username') username: string) {
     return this.usersService.findByUsername(username);
   }
+  */
 
-  @Get(':email')
-  async findByEmail(@Body('email') email: string) {
-    return this.usersService.findByEmail(email);
-  }
-*/
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
