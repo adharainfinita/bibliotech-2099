@@ -31,7 +31,4 @@ export class CreateBookDto {
   @IsOptional()
   @IsString()
   coverImageUrl?: string;
-
-  @IsUUID()
-  ownerId!: string;
 }

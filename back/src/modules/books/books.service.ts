@@ -17,13 +17,13 @@ export class BooksService {
   ) {}
 
   //*Create services
-  async create(createBookDto: CreateBookDto): Promise<BookResponseDto> {
+  async create(createBookDto: CreateBookDto, ownerId: string): Promise<BookResponseDto> {
     const owner = await this.userRepository.findOne({
-      where: { id: createBookDto.ownerId },
+      where: { id: ownerId },
     });
     if (!owner) {
       throw new NotFoundException(
-        `Owner with id ${createBookDto.ownerId} not found`,
+        `Owner with id ${ownerId} not found`,
       );
     }
     const book = this.bookRepository.create({
@@ -33,10 +33,6 @@ export class BooksService {
       description: createBookDto.description,
       fileUrl: createBookDto.fileUrl,
       coverImageUrl: createBookDto.coverImageUrl,
-      // cuando implementemos autenticación, el propietario debería
-      // obtenerse del usuario autenticado,
-      // no confiar en un ownerId enviado libremente por el cliente.
-      // Por ahora podemos utilizar ownerId para practicar la relación.
       owner,
     });
     const savedBook = await this.bookRepository.save(book);

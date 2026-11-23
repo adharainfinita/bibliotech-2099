@@ -7,18 +7,29 @@ import {
   Patch,
   Post,
   ParseUUIDPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+
+type AuthenticatedRequest = Request & {
+  user: {
+    userId: string;
+    email: string;
+  };
+};
 
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  async create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() createBookDto: CreateBookDto, @Req() request: AuthenticatedRequest) {
+    return this.booksService.create(createBookDto, request.user.userId);
   }
   @Get()
   async findAll() {
@@ -31,6 +42,7 @@ export class BooksController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateBookDto: UpdateBookDto,
@@ -39,7 +51,9 @@ export class BooksController {
   }
   
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.booksService.remove(id);
   }
-}
+};
+

@@ -3,11 +3,13 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService
   ) {}
   
   async register(registerDto: RegisterDto) {
@@ -24,11 +26,17 @@ export class AuthService {
       if (!isMatch) {
         throw new UnauthorizedException('Credenciales inválidas');
       }
+    
+    const accesToken = await this.jwtService.signAsync({
+      sub: userFound.id,
+      email: userFound.email,
+    });
     return {
       id: userFound.id,
       username: userFound.username,
       email: userFound.email,
       createdAt: userFound.createdAt,
+      accessToken: accesToken,
     };
   }
 
