@@ -7,6 +7,7 @@ import { BooksModule } from './modules/books/books.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { typeOrmConfig } from './config/ormconfig';
 import { ConfigModule } from '@nestjs/config';
+import { BookSharesModule } from './modules/book-shares/book-shares.module';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { ConfigModule } from '@nestjs/config';
   TypeOrmModule.forRootAsync(typeOrmConfig), 
     UsersModule, 
     BooksModule, 
-    AuthModule],
+    AuthModule, BookSharesModule],
   controllers: [AppController],
   providers: [AppService],
 })
