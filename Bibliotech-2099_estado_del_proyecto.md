@@ -375,7 +375,14 @@ Actualmente el proyecto se encuentra aproximadamente en:
 ③ ✅
 ④ ✅
 ⑤ ✅
-⑥ ⏳ SIGUIENTE PASO
+⑥ ✅ Entidades TypeORM
+⑦ ✅ Relaciones entre User y Book
+⑧ ⏳ Migraciones (pendientes de implementar)
+⑨ ✅ Módulos Users y Books
+⑩ ✅ Services
+⑪ ✅ Controllers / API REST para Users y Books
+⑫ ⏳ Autenticación completa
+⑬ ⏳ Frontend Angular
 ```
 
 ---
@@ -384,13 +391,13 @@ Actualmente el proyecto se encuentra aproximadamente en:
 
 El modelo entidad-relación fue diseñado anteriormente.
 
-La primera entidad que se comenzó a revisar para traducir a TypeORM es:
+Las entidades TypeORM implementadas actualmente son:
 
 ```text
-USER
+USER  ──< BOOK
 ```
 
-El diseño original proporcionado fue:
+El diseño original proporcionado para el modelo completo fue:
 
 ```text
 ┌──────────────────────────────────────────┐
@@ -495,6 +502,34 @@ El diseño original proporcionado fue:
 ```
 ---
 
+# 11. Módulos Users y Books — Estado actual
+
+Los módulos **Users** y **Books** cuentan con operaciones CRUD implementadas:
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `POST` | `/users` | Crear usuario |
+| `GET` | `/users` | Listar usuarios |
+| `GET` | `/users/:id` | Obtener usuario por UUID |
+| `PATCH` | `/users/:id` | Actualizar usuario |
+| `DELETE` | `/users/:id` | Eliminar usuario |
+| `POST` | `/books` | Crear libro |
+| `GET` | `/books` | Listar libros |
+| `GET` | `/books/:id` | Obtener libro por UUID |
+| `PATCH` | `/books/:id` | Actualizar libro |
+| `DELETE` | `/books/:id` | Eliminar libro |
+
+El estado de estos módulos incluye:
+
+- DTOs de creación, actualización y respuesta para ambos recursos.
+- Validaciones declaradas con `class-validator`; un `ValidationPipe` global transforma las entradas, elimina propiedades no permitidas y rechaza propiedades adicionales.
+- Los parámetros `:id` se validan como UUID mediante `ParseUUIDPipe`.
+- Las contraseñas se guardan como hash con `bcrypt` (factor de costo 10), no en texto plano. Las respuestas de usuario no exponen el hash.
+- Se lanzan errores `NotFoundException` al buscar o actualizar usuarios/libros inexistentes y cuando se crea un libro con un propietario inexistente.
+- El borrado de libros inexistentes lanza `NotFoundException`. El borrado de usuarios devuelve `false` cuando no encuentra el registro.
+
+---
+
 # 16. Flujo recomendado para retomar
 
 Cuando quieras volver al proyecto:
@@ -538,10 +573,10 @@ docker compose ps
 npm run start:dev
 ```
 
-Si todo está funcionando, continuar desde:
+Si todo está funcionando, continuar con los módulos del modelo que aún faltan:
 
 ```text
-CREACIÓN DEL MÓDULO USERS
+BookShare, Comment, Rating y ReadingStatus
 ```
 
 ---
@@ -647,6 +682,15 @@ Comment             ⏳ Pendiente
 Rating              ⏳ Pendiente
 ReadingStatus       ⏳ Pendiente
 
-SIGUIENTE PASO:
-Completar los módulos User y Books.
+MÓDULOS BACKEND:
+Users               ✅ CRUD, DTOs y validaciones
+Books               ✅ CRUD, DTOs y validaciones
+Hash de contraseñas ✅ bcrypt
+Manejo de errores   ✅ errores de validación y recursos inexistentes
+
+PENDIENTE:
+Migraciones de TypeORM
+Módulos BookShare, Comment, Rating y ReadingStatus
+Autenticación completa
+Frontend Angular
 ```

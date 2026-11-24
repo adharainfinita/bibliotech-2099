@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from './entities/books.entity';
@@ -79,6 +79,7 @@ export class BooksService {
   async update(
     id: string,
     updateBookDto: UpdateBookDto,
+    ownerId: string
   ): Promise<BookResponseDto> {
     const book = await this.bookRepository.findOne({
       where: { id },
@@ -87,15 +88,26 @@ export class BooksService {
       },
     });
     if (!book) throw new NotFoundException(`Book with id ${id} not found`);
+    if (book.owner.id !== ownerId) {
+      throw new ForbiddenException(`You are not the owner of this book`);
+    }
     Object.assign(book, updateBookDto);
     const updatedBook = await this.bookRepository.save(book);
     return this.toResponseDto(updatedBook);
   }
 
   //*Delete services
-  async remove(id: string): Promise<boolean> {
-    const book = await this.bookRepository.findOne({ where: { id } });
+  async remove(id: string, ownerId: string): Promise<boolean> {
+    const book = await this.bookRepository.findOne({
+      where: { id },
+      relations: {
+        owner: true,
+      }, 
+      });
     if (!book) throw new NotFoundException(`Book with id ${id} not found`);
+    if (book.owner.id !== ownerId) {
+      throw new ForbiddenException(`You are not the owner of this book`);
+    }
     await this.bookRepository.remove(book);
     return true;
   }

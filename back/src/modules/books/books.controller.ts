@@ -46,14 +46,15 @@ export class BooksController {
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateBookDto: UpdateBookDto,
+    @Req() request: AuthenticatedRequest
   ) {
-    return this.booksService.update(id, updateBookDto);
+    return this.booksService.update(id, updateBookDto, request.user.userId);
   }
   
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.booksService.remove(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string, @Req() request: AuthenticatedRequest) {
+    return this.booksService.remove(id, request.user.userId);
   }
 };
 

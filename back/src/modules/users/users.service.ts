@@ -6,6 +6,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LibraryResponseDto } from './dto/library-response.dto';
+import { Book } from '../books/entities/books.entity';
+import { PublicUserResponseDto } from './dto/public-user-response.dto';
 
 interface PostgresError {
   code: string;
@@ -62,23 +65,21 @@ export class UsersService {
   }
 
   //*Read services
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(): Promise<PublicUserResponseDto[]> {
     const users = await this.userRepository.find();
     return users.map((user) => ({
       id: user.id,
       username: user.username,
-      email: user.email,
       createdAt: user.createdAt,
     }));
   }
 
-  async findById(id: string): Promise<UserResponseDto | null> {
+  async findById(id: string): Promise<PublicUserResponseDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
     return {
       id: user.id,
       username: user.username,
-      email: user.email,
       createdAt: user.createdAt,
     };
   }
@@ -88,6 +89,57 @@ export class UsersService {
     where: { email },
   });
 }
+
+async findLibrary(id: string): Promise<LibraryResponseDto> {
+  const user = await this.userRepository.findOne({
+    where: { id },
+    relations: {
+      books: {
+        owner: true,
+      },
+    },
+  });
+
+  if (!user) {
+    throw new NotFoundException(`User with id ${id} not found`);
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    books: user.books.map((book) => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      genre: book.genre,
+      description: book.description,
+      fileUrl: book.fileUrl,
+      coverImageUrl: book.coverImageUrl,
+      owner: {
+        id: user.id,
+        username: user.username,
+      },
+    })),
+  };
+}
+
+async findMe(id: string): Promise<UserResponseDto> {
+  const user = await this.userRepository.findOne({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new NotFoundException(`User with id ${id} not found`);
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    createdAt: user.createdAt,
+  };
+}
+
   //*Update Services
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });
